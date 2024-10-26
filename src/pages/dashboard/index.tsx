@@ -7,6 +7,7 @@ import { getDocs, collection, query, where, deleteDoc, doc } from "firebase/fire
 import { db, storage } from "../../services/firebaseConnection"
 import { AuthContext } from "../../contexts/AuthContext"
 import { ref, deleteObject} from 'firebase/storage'
+import { Link } from "react-router-dom"
 
 interface CarsProps{
     id: string;
@@ -103,11 +104,16 @@ const { user } = useContext(AuthContext)
                   </div>
                  <div className="w-full h-6 bg-slate-200 mt-2">
                       <div className="px-2 pb-2 text-center">
-                          <span className="text-black ">
+                          <span className="text-black">
                              {car.city}
                           </span>
                       </div>
                  </div>
+                 <Link to={`edit/${car.id}`}>
+                    <button 
+                    className="w-full bg-green-500 cursor-pointer p-2 font-medium text-white hover:opacity-90">Editar
+                    </button>
+                 </Link>
               </section>
               ))}
             </main>

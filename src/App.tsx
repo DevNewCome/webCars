@@ -7,6 +7,7 @@ import { ErrorPage } from './pages/404'
 import { Car } from './pages/car'
 import { DashBoard } from './pages/dashboard'
 import { New } from './pages/dashboard/new'
+import { EditCar } from './pages/dashboard/editCar'
 import { Private } from './routes/Private'
 
 const router = createBrowserRouter([
@@ -16,6 +17,7 @@ const router = createBrowserRouter([
     {path: '/car/:id', element: <Car/>},
     {path: '/dashboard', element: <Private><DashBoard/></Private>},
     {path: '/dashboard/new', element: <Private><New/></Private> },  
+    {path: '/dashboard/edit/:id', element: <Private><EditCar/></Private> },  
     {path: '*', element: <ErrorPage/>}
    ]
 },
