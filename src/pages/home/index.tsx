@@ -49,7 +49,7 @@ export function Home(){
                     })
                 })
                 setCars(listCars)
-                //console.log(listCars)
+                console.log(listCars)
             })
       }
 
@@ -57,7 +57,7 @@ export function Home(){
         setLoadImages((prevImageLoaded) => [...prevImageLoaded, id])
       }
 
-       async function handleSearchCar(){
+       async  function handleSearchCar(){
           if(input === ''){
             loadCars()
             return;
