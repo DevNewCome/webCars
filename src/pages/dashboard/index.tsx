@@ -1,145 +1,115 @@
-import { Container } from "../../components/container";
-import { DashboardHeader } from "../../components/panelheader";
-import { FiTrash2 } from "react-icons/fi";
-import { useContext, useEffect, useState } from "react";
-import {
-  getDocs,
-  collection,
-  query,
-  where,
-  deleteDoc,
-  doc,
-} from "firebase/firestore";
-import { db, storage } from "../../services/firebaseConnection";
-import { AuthContext } from "../../contexts/AuthContext";
-import { ref, deleteObject } from "firebase/storage";
-import { Link } from "react-router-dom";
+import { Container } from "../../components/container"
+import { DashboardHeader } from "../../components/panelheader"
+import { FiTrash2 } from "react-icons/fi"
+import { useContext, useEffect, useState } from "react"
+import { getDocs, collection, query, where, deleteDoc, doc } from "firebase/firestore"
+import { db, storage } from "../../services/firebaseConnection"
+import { AuthContext } from "../../contexts/AuthContext"
+import { ref, deleteObject } from "firebase/storage"
+import { Link } from "react-router-dom"
 
 interface CarsProps {
-  id: string;
-  name: string;
-  year: string;
-  km: number;
-  city: string;
-  price: number | string;
-  images: imageCarProps[];
-  uid: string;
+  id: string
+  name: string
+  year: string
+  km: string
+  city: string
+  price: number | string
+  images: imageCarProps[]
+  uid: string
+  created: any
 }
 
 interface imageCarProps {
-  name: string;
-  uid: string;
-  url: string;
+  name: string
+  uid: string
+  url: string
 }
 
 export function DashBoard() {
-  const [cars, setCars] = useState<CarsProps[]>([]);
-  const { user } = useContext(AuthContext);
+  const [cars, setCars] = useState<CarsProps[]>([])
+  const { user } = useContext(AuthContext)
 
   useEffect(() => {
-    function loadCars() {
-      if (!user?.uid) {
-        return;
-      }
+    async function loadCars() {
+      if (!user?.uid) return
 
-      const carsRef = collection(db, "cars");
-      const queryRef = query(carsRef, where("uid", "==", user.uid));
+      const carsRef = collection(db, "cars")
+      const queryRef = query(carsRef, where("uid", "==", user.uid))
+      const snapshot = await getDocs(queryRef)
 
-      getDocs(queryRef).then((snapshot) => {
-        let listCars = [] as CarsProps[];
-        snapshot.forEach((doc) => {
-          listCars.push({
-            id: doc.id,
-            name: doc.data().name,
-            year: doc.data().year,
-            km: doc.data().km,
-            city: doc.data().city,
-            price: doc.data().price,
-            images: doc.data().images,
-            uid: doc.data().uid,
-          });
-        });
-        setCars(listCars);
-        console.log(listCars);
-      });
+      const listCars: CarsProps[] = []
+      snapshot.forEach(doc => {
+        const data = doc.data()
+        listCars.push({
+          id: doc.id,
+          name: data.name,
+          year: data.year,
+          km: data.km,
+          city: data.city,
+          price: data.price,
+          images: data.images,
+          uid: data.uid,
+          created: data.created
+        })
+      })
+      setCars(listCars)
     }
-    loadCars();
-  }, [user]);
+
+    loadCars()
+  }, [user])
 
   async function handleDeleteCar(car: CarsProps) {
-    let itemCar = car;
+    const docRef = doc(db, "cars", car.id)
+    await deleteDoc(docRef)
 
-    const docRef = doc(db, "cars", itemCar.id);
-    await deleteDoc(docRef);
-
-    itemCar.images.map(async (image) => {
-      let imagePath = `images/${image.uid}/${image.name}`;
-      let imageRef = ref(storage, imagePath);
+    car.images.map(async image => {
+      const imagePath = `images/${image.uid}/${image.name}`
+      const imageRef = ref(storage, imagePath)
       try {
-        await deleteObject(imageRef);
-        setCars(cars.filter((car) => car.id !== itemCar.id));
+        await deleteObject(imageRef)
+        setCars(prev => prev.filter(c => c.id !== car.id))
       } catch (err) {
-        console.log(err);
-        alert("Erro ao deletar a imagem");
+        console.log(err)
+        alert("Erro ao deletar a imagem")
       }
-    });
+    })
   }
 
   return (
     <Container>
       <DashboardHeader />
       <main className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {cars && cars.length > 0 ? (
-          cars.map((car) => (
-            <section
-              className="w-full bg-white rounded-lg relative border-2"
-              key={car.id}
-            >
+        {cars.length > 0 ? (
+          cars.map(car => (
+            <section key={car.id} className="bg-white rounded-lg shadow-md overflow-hidden relative hover:shadow-lg transition-shadow duration-200">
               <button
                 onClick={() => handleDeleteCar(car)}
-                className="absolute bg-white w-14 h-10 rounded-full flex items-center justify-center left-2 top-2 drop-shadow"
+                className="absolute bg-white w-12 h-10 rounded-full flex items-center justify-center left-2 top-2 drop-shadow hover:bg-red-500 hover:text-white transition"
               >
-                <FiTrash2 size={26} color="#000" />
+                <FiTrash2 size={24} />
               </button>
-
-              <img
-                className="w-full h-72 object-cover rounded-lg mb-2"
-                src={car.images[0].url}
-                alt=""
-              />
-
-              <p className="font-bold mt-1 px-2 mb-2">{car.name}</p>
-
-              <div className="flex flex-col px-2">
-                <span>
-                  {car.year} | {car.km}
-                </span>
-                <strong className="text-black font-bold mt-4">
-                  {car.price}
-                </strong>
+              <img className="w-full aspect-[4/3] object-cover" src={car.images[0].url} alt="" />
+              <div className="p-3 flex flex-col gap-1">
+                <p className="font-bold text-lg">{car.name}</p>
+                <p className="text-gray-500 text-sm">Criado em: {new Date(car.created?.seconds * 1000).toLocaleDateString()}</p>
+                <span className="text-gray-700 text-sm">{car.year} | {car.km}</span>
+                <strong className="text-black font-semibold text-xl">preço: {car.price}</strong>
+                <span className="text-gray-600">{car.city}</span>
               </div>
-
-              <div className="w-full h-6 bg-slate-200 mt-2">
-                <div className="px-2 pb-2 text-center">
-                  <span className="text-black">{car.city}</span>
-                </div>
-              </div>
-
               <Link to={`edit/${car.id}`}>
-                <button className="w-full bg-green-500 cursor-pointer p-2 font-medium text-white hover:opacity-90">
-                  Editar
-                </button>
+                <button className="w-full bg-green-500 p-2 font-medium text-white hover:opacity-90 transition">Editar</button>
               </Link>
             </section>
           ))
         ) : (
           <div className="w-full col-span-full flex justify-center items-center mt-10">
             <p className="text-gray-500 font-bold text-2xl text-center">
-                Ainda não há carros cadastrados.
+              Ainda não há carros cadastrados.
             </p>
-        </div>
+          </div>
         )}
       </main>
     </Container>
-  );
+  )
 }
