@@ -29,9 +29,9 @@ function onSubmit(data: FormData){
     signInWithEmailAndPassword(auth, data.email, data.password)
         .then((user)=>{
             toast.success('Entrou')
-            navigate('/dashboard', {replace: true})
+            navigate('/', {replace: true})
         })
-        .catch(error =>   toast.success('Erro ao fazer o login'))
+        .catch(error => toast.error('Erro ao fazer o login'))
 }
 
 useEffect(()=>{

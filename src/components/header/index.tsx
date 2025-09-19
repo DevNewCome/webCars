@@ -30,13 +30,13 @@ export function Header() {
         ) : (
           <div className="flex gap-6">
             <Link to="/register">
-              <button className="font-medium text-xl text-slate-600 hover:text-slate-500">
-                CADASTRE-SE
-              </button>
+              <button className="font-medium text-xl hover:bg-gray-200 transition duration-300 ease-in-out text-gray-500  px-4 py-2 rounded-full flex items-center justify-center">
+              Registre-se
+            </button>
             </Link>
             <Link to="/login">
-              <button className="font-medium text-xl text-slate-600 hover:text-slate-500">
-                ENTRAR
+              <button className="font-medium text-xl hover:bg-gray-200 transition duration-300 ease-in-out text-gray-500  px-4 py-2 rounded-full flex items-center justify-center">
+                Login
               </button>
             </Link>
           </div>
